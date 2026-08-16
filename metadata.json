@@ -1,0 +1,6 @@
+{
+  "name": "OsmoFlow 360",
+  "description": "AI companion for DJI Osmo 360 footage: intelligent angle detection, DaVinci Resolve EDL export, trilingual captions (Urdu/Pashto/English), batch Reels ranking, and director editing plans.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
