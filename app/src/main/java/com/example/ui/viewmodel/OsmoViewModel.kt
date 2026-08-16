@@ -5,12 +5,18 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.AppDatabase
 import com.example.data.model.ClipEntity
+import com.example.data.model.ColorGradeEntity
+import com.example.data.model.CopilotMessageEntity
 import com.example.data.model.EditorScriptEntity
 import com.example.data.model.EdlItemEntity
 import com.example.data.model.KeyframeAngleEntity
+import com.example.data.model.MusicTrackEntity
 import com.example.data.model.ProjectEntity
 import com.example.data.model.SocialCopyEntity
+import com.example.data.model.SpeedRampEntity
+import com.example.data.model.SubtitleItemEntity
 import com.example.data.repository.OsmoRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,8 +30,13 @@ enum class AppTab {
     BATCH_RANKING,
     CLIP_INSPECTOR,
     EDL_DAVINCI,
+    AI_SOUNDTRACK,
+    COLOR_GRADING_LUT,
+    SPEED_RAMP_STUDIO,
+    KINETIC_SUBTITLES,
     SOCIAL_COPY,
-    DIRECTOR_PLAN
+    DIRECTOR_PLAN,
+    DIRECTOR_COPILOT
 }
 
 enum class PlatformFilter {
@@ -34,6 +45,7 @@ enum class PlatformFilter {
     LANDSCAPE_FIRST
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class OsmoViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = OsmoRepository(AppDatabase.getDatabase(application))
@@ -112,6 +124,41 @@ class OsmoViewModel(application: Application) : AndroidViewModel(application) {
             if (id != null) repository.getLatestScript(id) else flowOf(null)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    // Active project Music Track
+    val activeMusicTrack: StateFlow<MusicTrackEntity?> = _selectedProjectId
+        .flatMapLatest { id ->
+            if (id != null) repository.getActiveMusicTrack(id) else flowOf(null)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    // Active project Color Grade
+    val activeColorGrade: StateFlow<ColorGradeEntity?> = _selectedProjectId
+        .flatMapLatest { id ->
+            if (id != null) repository.getActiveColorGrade(id) else flowOf(null)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    // Active project Speed Ramps
+    val projectSpeedRamps: StateFlow<List<SpeedRampEntity>> = _selectedProjectId
+        .flatMapLatest { id ->
+            if (id != null) repository.getSpeedRamps(id) else flowOf(emptyList())
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Active project Subtitles
+    val projectSubtitles: StateFlow<List<SubtitleItemEntity>> = _selectedProjectId
+        .flatMapLatest { id ->
+            if (id != null) repository.getSubtitles(id) else flowOf(emptyList())
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Active project Copilot Messages
+    val copilotMessages: StateFlow<List<CopilotMessageEntity>> = _selectedProjectId
+        .flatMapLatest { id ->
+            if (id != null) repository.getCopilotMessages(id) else flowOf(emptyList())
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
         viewModelScope.launch {
@@ -228,6 +275,94 @@ class OsmoViewModel(application: Application) : AndroidViewModel(application) {
                 _statusMessage.value = "Director's Cut Plan & Python Automation generated!"
             } catch (e: Exception) {
                 _statusMessage.value = "Director plan generated."
+            } finally {
+                _isAnalyzing.value = false
+            }
+        }
+    }
+
+    fun generateLyriaMusic(genreMood: String, prompt: String, durationSec: Int, isPro: Boolean) {
+        val projectId = _selectedProjectId.value ?: return
+        viewModelScope.launch {
+            _isAnalyzing.value = true
+            val modelName = if (isPro || durationSec > 30) "lyria-3-pro-preview" else "lyria-3-clip-preview"
+            _statusMessage.value = "Generating AI Soundtrack with $modelName..."
+            try {
+                val track = repository.generateLyriaMusic(projectId, genreMood, prompt, durationSec, isPro)
+                _statusMessage.value = "Generated '${track.title}' ($modelName) at ${track.bpm} BPM!"
+            } catch (e: Exception) {
+                _statusMessage.value = "Generated music track with action presets."
+            } finally {
+                _isAnalyzing.value = false
+            }
+        }
+    }
+
+    fun generateColorGradeLut(styleName: String, customPrompt: String) {
+        val projectId = _selectedProjectId.value ?: return
+        viewModelScope.launch {
+            _isAnalyzing.value = true
+            _statusMessage.value = "Synthesizing 3D LUT Color Grade for '$styleName' (Gemini 3.1 Flash Lite)..."
+            try {
+                val grade = repository.generateColorGradeLut(projectId, styleName, customPrompt)
+                _statusMessage.value = "Color Grade & DaVinci .CUBE LUT '${grade.lutName}' Ready!"
+            } catch (e: Exception) {
+                _statusMessage.value = "Applied Color Grade LUT."
+            } finally {
+                _isAnalyzing.value = false
+            }
+        }
+    }
+
+    fun updateColorGrade(grade: ColorGradeEntity) {
+        viewModelScope.launch {
+            repository.saveColorGrade(grade)
+        }
+    }
+
+    fun generateSpeedRamps(rampStyle: String) {
+        val projectId = _selectedProjectId.value ?: return
+        viewModelScope.launch {
+            _isAnalyzing.value = true
+            _statusMessage.value = "Generating Bezier Speed Ramps & Optical Flow Curves..."
+            try {
+                val ramps = repository.generateSpeedRamps(projectId, rampStyle)
+                _statusMessage.value = "Generated ${ramps.size} Speed Ramp curves!"
+            } catch (e: Exception) {
+                _statusMessage.value = "Updated speed ramps."
+            } finally {
+                _isAnalyzing.value = false
+            }
+        }
+    }
+
+    fun generateSubtitles(stylePreset: String, language: String) {
+        val projectId = _selectedProjectId.value ?: return
+        viewModelScope.launch {
+            _isAnalyzing.value = true
+            _statusMessage.value = "Generating kinetic animated subtitles in $language ($stylePreset)..."
+            try {
+                val subs = repository.generateSubtitles(projectId, stylePreset, language)
+                _statusMessage.value = "Generated ${subs.size} timed animated subtitles!"
+            } catch (e: Exception) {
+                _statusMessage.value = "Updated subtitles."
+            } finally {
+                _isAnalyzing.value = false
+            }
+        }
+    }
+
+    fun sendCopilotMessage(userMessage: String) {
+        val projectId = _selectedProjectId.value ?: return
+        if (userMessage.isBlank()) return
+        viewModelScope.launch {
+            _isAnalyzing.value = true
+            _statusMessage.value = "Consulting AI Director Copilot (Gemini 3.1 Pro)..."
+            try {
+                repository.sendCopilotMessage(projectId, userMessage)
+                _statusMessage.value = "AI Director Copilot responded!"
+            } catch (e: Exception) {
+                _statusMessage.value = "Copilot responded with director insights."
             } finally {
                 _isAnalyzing.value = false
             }

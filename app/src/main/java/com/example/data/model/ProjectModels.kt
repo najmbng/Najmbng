@@ -162,3 +162,139 @@ data class EditorScriptEntity(
     val csvMarkersRawText: String,
     val generatedAt: Long = System.currentTimeMillis()
 )
+
+@Entity(
+    tableName = "music_tracks",
+    foreignKeys = [
+        ForeignKey(
+            entity = ProjectEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["projectId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("projectId")]
+)
+data class MusicTrackEntity(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val projectId: String,
+    val title: String,
+    val genreMood: String, // "Cinematic Action", "Lo-Fi Chill", "Cyberpunk Synth", "Dramatic Drone", "Upbeat Vlog"
+    val bpm: Int = 124,
+    val durationSeconds: Int = 30,
+    val modelUsed: String = "lyria-3-clip-preview", // "lyria-3-clip-preview" or "lyria-3-pro-preview"
+    val prompt: String,
+    val waveformPoints: String = "20,45,60,80,95,70,55,40,65,85,100,75,60,45,30,50,70,90,65,40",
+    val audioEnergy: String = "High",
+    val duckingLevelDb: Float = -6.0f,
+    val isAttachedToTimeline: Boolean = true,
+    val generatedAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "color_grades",
+    foreignKeys = [
+        ForeignKey(
+            entity = ProjectEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["projectId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("projectId")]
+)
+data class ColorGradeEntity(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val projectId: String,
+    val lutName: String,
+    val presetDescription: String,
+    val temperature: Int = 5600, // Kelvin or offset (-100 to +100)
+    val tint: Int = 4, // -100 to +100
+    val exposure: Float = 0.3f, // -2.0 to +2.0 EV
+    val contrast: Float = 1.15f,
+    val saturation: Float = 1.10f,
+    val liftR: Float = -0.02f,
+    val liftG: Float = 0.01f,
+    val liftB: Float = 0.04f, // Cool shadows
+    val gammaR: Float = 0.02f,
+    val gammaG: Float = 0.00f,
+    val gammaB: Float = -0.01f,
+    val gainR: Float = 0.05f,
+    val gainG: Float = 0.02f,
+    val gainB: Float = -0.04f, // Warm highlights (Teal & Orange)
+    val cubeLutRawText: String = "",
+    val generatedAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "speed_ramps",
+    foreignKeys = [
+        ForeignKey(
+            entity = ProjectEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["projectId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("projectId")]
+)
+data class SpeedRampEntity(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val projectId: String,
+    val clipId: String,
+    val clipName: String,
+    val rampType: String, // "Whip-Pan Snap (4x -> 0.25x)", "Slow-Mo Impact (0.2x)", "Hyper-Smooth Flow"
+    val inSpeedMultiplier: Float = 1.0f,
+    val peakSpeedMultiplier: Float = 3.5f,
+    val impactSpeedMultiplier: Float = 0.25f,
+    val outSpeedMultiplier: Float = 1.0f,
+    val curveEasing: String = "Bezier EaseInOut",
+    val opticalFlowEnabled: Boolean = true,
+    val motionBlurStrength: Int = 75
+)
+
+@Entity(
+    tableName = "subtitles",
+    foreignKeys = [
+        ForeignKey(
+            entity = ProjectEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["projectId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("projectId")]
+)
+data class SubtitleItemEntity(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val projectId: String,
+    val startTimecode: String,
+    val endTimecode: String,
+    val text: String,
+    val language: String = "English",
+    val stylePreset: String = "MrBeast Kinetic Pop", // "MrBeast Kinetic Pop", "Cinematic Clean", "Cyberpunk Neon", "Urdu Nastaliq Calligraphy"
+    val highlightColor: String = "#FFDE59",
+    val fontSizeSp: Int = 22
+)
+
+@Entity(
+    tableName = "copilot_messages",
+    foreignKeys = [
+        ForeignKey(
+            entity = ProjectEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["projectId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("projectId")]
+)
+data class CopilotMessageEntity(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val projectId: String,
+    val isUser: Boolean,
+    val messageText: String,
+    val modelUsed: String = "gemini-3.1-pro-preview",
+    val actionSuggested: String? = null,
+    val timestamp: Long = System.currentTimeMillis()
+)

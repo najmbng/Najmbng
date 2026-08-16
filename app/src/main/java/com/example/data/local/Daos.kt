@@ -127,3 +127,72 @@ interface EditorScriptDao {
     @Query("DELETE FROM editor_scripts WHERE projectId = :projectId")
     suspend fun deleteScriptsForProject(projectId: String)
 }
+
+@Dao
+interface MusicTrackDao {
+    @Query("SELECT * FROM music_tracks WHERE projectId = :projectId ORDER BY generatedAt DESC")
+    fun getMusicTracksForProject(projectId: String): Flow<List<com.example.data.model.MusicTrackEntity>>
+
+    @Query("SELECT * FROM music_tracks WHERE projectId = :projectId ORDER BY generatedAt DESC LIMIT 1")
+    fun getActiveMusicTrack(projectId: String): Flow<com.example.data.model.MusicTrackEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMusicTrack(track: com.example.data.model.MusicTrackEntity)
+
+    @Query("DELETE FROM music_tracks WHERE projectId = :projectId")
+    suspend fun deleteMusicTracksForProject(projectId: String)
+}
+
+@Dao
+interface ColorGradeDao {
+    @Query("SELECT * FROM color_grades WHERE projectId = :projectId ORDER BY generatedAt DESC LIMIT 1")
+    fun getActiveColorGrade(projectId: String): Flow<com.example.data.model.ColorGradeEntity?>
+
+    @Query("SELECT * FROM color_grades WHERE projectId = :projectId ORDER BY generatedAt DESC")
+    fun getAllColorGradesForProject(projectId: String): Flow<List<com.example.data.model.ColorGradeEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertColorGrade(grade: com.example.data.model.ColorGradeEntity)
+
+    @Query("DELETE FROM color_grades WHERE projectId = :projectId")
+    suspend fun deleteColorGradesForProject(projectId: String)
+}
+
+@Dao
+interface SpeedRampDao {
+    @Query("SELECT * FROM speed_ramps WHERE projectId = :projectId")
+    fun getSpeedRampsForProject(projectId: String): Flow<List<com.example.data.model.SpeedRampEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSpeedRamps(ramps: List<com.example.data.model.SpeedRampEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSpeedRamp(ramp: com.example.data.model.SpeedRampEntity)
+
+    @Query("DELETE FROM speed_ramps WHERE projectId = :projectId")
+    suspend fun deleteSpeedRampsForProject(projectId: String)
+}
+
+@Dao
+interface SubtitleDao {
+    @Query("SELECT * FROM subtitles WHERE projectId = :projectId ORDER BY startTimecode ASC")
+    fun getSubtitlesForProject(projectId: String): Flow<List<com.example.data.model.SubtitleItemEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubtitles(subs: List<com.example.data.model.SubtitleItemEntity>)
+
+    @Query("DELETE FROM subtitles WHERE projectId = :projectId")
+    suspend fun deleteSubtitlesForProject(projectId: String)
+}
+
+@Dao
+interface CopilotMessageDao {
+    @Query("SELECT * FROM copilot_messages WHERE projectId = :projectId ORDER BY timestamp ASC")
+    fun getMessagesForProject(projectId: String): Flow<List<com.example.data.model.CopilotMessageEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMessage(msg: com.example.data.model.CopilotMessageEntity)
+
+    @Query("DELETE FROM copilot_messages WHERE projectId = :projectId")
+    suspend fun deleteMessagesForProject(projectId: String)
+}

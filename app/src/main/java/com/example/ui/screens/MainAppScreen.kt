@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,17 +18,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Assistant
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Visibility
@@ -56,6 +64,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -68,8 +77,13 @@ import com.example.ui.components.NewProjectDialog
 import com.example.ui.theme.CinemaGold
 import com.example.ui.theme.DaVinciPurple
 import com.example.ui.theme.LandscapeEmerald
+import com.example.ui.theme.OsmoCyan
 import com.example.ui.theme.OsmoCyanGlow
+import com.example.ui.theme.OsmoNeonGreen
+import com.example.ui.theme.OsmoOrange
+import com.example.ui.theme.OsmoPurple
 import com.example.ui.theme.OsmoTeal
+import com.example.ui.theme.OsmoYellow
 import com.example.ui.theme.ReelCrimson
 import com.example.ui.theme.Slate200
 import com.example.ui.theme.Slate400
@@ -117,6 +131,7 @@ fun MainAppScreen(viewModel: OsmoViewModel) {
 
     var projectDropdownExpanded by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val featureScrollState = rememberScrollState()
 
     LaunchedEffect(statusMessage) {
         statusMessage?.let {
@@ -129,139 +144,200 @@ fun MainAppScreen(viewModel: OsmoViewModel) {
         modifier = Modifier.testTag("main_scaffold"),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            Surface(
-                color = SleekSurface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, SleekBorderSubtle),
-                shadowElevation = 1.dp
-            ) {
-                TopAppBar(
-                    title = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // App Brand Logo icon
-                            Box(
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .background(SleekPurple, RoundedCornerShape(10.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "360",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.White,
-                                    fontSize = 11.sp
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(10.dp))
-
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+            Column {
+                Surface(
+                    color = SleekSurface,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SleekBorderSubtle),
+                    shadowElevation = 1.dp
+                ) {
+                    TopAppBar(
+                        title = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // App Brand Logo icon
+                                Box(
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .background(SleekPurple, RoundedCornerShape(10.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Text(
-                                        text = "OsmoFlow 360",
-                                        style = MaterialTheme.typography.titleMedium,
+                                        text = "360",
+                                        style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
-                                        color = SleekTextPrimary
+                                        color = Color.White,
+                                        fontSize = 11.sp
                                     )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Surface(
-                                        color = SleekPurpleContainer,
-                                        shape = RoundedCornerShape(6.dp)
-                                    ) {
-                                        Text(
-                                            text = "PRO RESOLVE",
-                                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = SleekPurpleOnContainer,
-                                            fontSize = 8.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
                                 }
 
-                                // Project Selector Pill
-                                Box {
-                                    Row(
-                                        modifier = Modifier
-                                            .clickable { projectDropdownExpanded = true }
-                                            .padding(vertical = 1.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            text = activeProject?.title ?: "Select Project",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = SleekPurple,
-                                            fontWeight = FontWeight.SemiBold,
-                                            maxLines = 1
+                                            text = "OsmoFlow 360",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Black,
+                                            color = SleekTextPrimary
                                         )
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowDropDown,
-                                            contentDescription = "Select Project",
-                                            tint = SleekPurple,
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Surface(
+                                            color = SleekPurpleContainer,
+                                            shape = RoundedCornerShape(6.dp)
+                                        ) {
+                                            Text(
+                                                text = "PRO RESOLVE",
+                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = SleekPurpleOnContainer,
+                                                fontSize = 8.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
                                     }
 
-                                    DropdownMenu(
-                                        expanded = projectDropdownExpanded,
-                                        onDismissRequest = { projectDropdownExpanded = false },
-                                        modifier = Modifier.background(SleekSurface)
-                                    ) {
-                                        allProjects.forEach { proj ->
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Column {
-                                                        Text(
-                                                            text = proj.title,
-                                                            color = if (proj.id == activeProject?.id) SleekPurple else SleekTextPrimary,
-                                                            fontWeight = if (proj.id == activeProject?.id) FontWeight.Bold else FontWeight.Normal
-                                                        )
-                                                        Text(
-                                                            text = "${proj.preferredPacing} • ${proj.targetFramerate} FPS",
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = SleekTextSecondary
-                                                        )
-                                                    }
-                                                },
-                                                onClick = {
-                                                    viewModel.selectProject(proj.id)
-                                                    projectDropdownExpanded = false
-                                                }
+                                    // Project Selector Pill
+                                    Box {
+                                        Row(
+                                            modifier = Modifier
+                                                .clickable { projectDropdownExpanded = true }
+                                                .padding(vertical = 1.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = activeProject?.title ?: "Select Project",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = SleekPurple,
+                                                fontWeight = FontWeight.SemiBold,
+                                                maxLines = 1
                                             )
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowDropDown,
+                                                contentDescription = "Select Project",
+                                                tint = SleekPurple,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+
+                                        DropdownMenu(
+                                            expanded = projectDropdownExpanded,
+                                            onDismissRequest = { projectDropdownExpanded = false },
+                                            modifier = Modifier.background(SleekSurface)
+                                        ) {
+                                            allProjects.forEach { proj ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Column {
+                                                            Text(
+                                                                text = proj.title,
+                                                                color = if (proj.id == activeProject?.id) SleekPurple else SleekTextPrimary,
+                                                                fontWeight = if (proj.id == activeProject?.id) FontWeight.Bold else FontWeight.Normal
+                                                            )
+                                                            Text(
+                                                                text = "${proj.preferredPacing} • ${proj.targetFramerate} FPS",
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                color = SleekTextSecondary
+                                                            )
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        viewModel.selectProject(proj.id)
+                                                        projectDropdownExpanded = false
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = { viewModel.setShowNewProjectDialog(true) },
-                            modifier = Modifier.testTag("top_bar_new_project_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "New Project",
-                                tint = SleekPurple
-                            )
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = { viewModel.setShowNewProjectDialog(true) },
+                                modifier = Modifier.testTag("top_bar_new_project_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "New Project",
+                                    tint = SleekPurple
+                                )
+                            }
+
+                            IconButton(
+                                onClick = { viewModel.setShowExportDialog(true) },
+                                modifier = Modifier.testTag("top_bar_export_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FileDownload,
+                                    contentDescription = "Export DaVinci Resolve",
+                                    tint = CinemaGold
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = SleekSurface,
+                            titleContentColor = SleekTextPrimary
+                        )
+                    )
+                }
+
+                // Advanced Editing Features Quick Ribbon
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF0F141C))
+                        .horizontalScroll(featureScrollState)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val tabs = listOf(
+                        Triple(AppTab.BATCH_RANKING, "Rank Matrix", Icons.Default.Layers),
+                        Triple(AppTab.CLIP_INSPECTOR, "360 Angles", Icons.Default.Visibility),
+                        Triple(AppTab.EDL_DAVINCI, "Resolve EDL", Icons.Default.ContentCut),
+                        Triple(AppTab.AI_SOUNDTRACK, "AI Music (Lyria)", Icons.Default.GraphicEq),
+                        Triple(AppTab.COLOR_GRADING_LUT, "Color 3D LUT", Icons.Default.ColorLens),
+                        Triple(AppTab.SPEED_RAMP_STUDIO, "Speed Ramp", Icons.Default.Speed),
+                        Triple(AppTab.KINETIC_SUBTITLES, "Kinetic Subs", Icons.Default.Subtitles),
+                        Triple(AppTab.SOCIAL_COPY, "3-Lang Copy", Icons.Default.Translate),
+                        Triple(AppTab.DIRECTOR_PLAN, "Director Cut", Icons.Default.Description),
+                        Triple(AppTab.DIRECTOR_COPILOT, "AI Director (3.1 Pro)", Icons.Default.Videocam)
+                    )
+
+                    tabs.forEach { (tab, title, icon) ->
+                        val isSelected = selectedTab == tab
+                        val chipColor = when (tab) {
+                            AppTab.AI_SOUNDTRACK -> OsmoCyan
+                            AppTab.COLOR_GRADING_LUT -> OsmoOrange
+                            AppTab.SPEED_RAMP_STUDIO -> OsmoNeonGreen
+                            AppTab.KINETIC_SUBTITLES -> OsmoYellow
+                            AppTab.DIRECTOR_COPILOT -> OsmoPurple
+                            else -> SleekPurple
                         }
 
-                        IconButton(
-                            onClick = { viewModel.setShowExportDialog(true) },
-                            modifier = Modifier.testTag("top_bar_export_button")
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(if (isSelected) chipColor else Color(0xFF1E2530))
+                                .clickable { viewModel.selectTab(tab) }
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Default.FileDownload,
-                                contentDescription = "Export DaVinci Resolve",
-                                tint = CinemaGold
+                                imageVector = icon,
+                                contentDescription = title,
+                                tint = if (isSelected) Color.Black else Color.White,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) Color.Black else Color.White,
+                                fontSize = 11.sp
                             )
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = SleekSurface,
-                        titleContentColor = SleekTextPrimary
-                    )
-                )
+                    }
+                }
             }
         },
         bottomBar = {
@@ -283,7 +359,7 @@ fun MainAppScreen(viewModel: OsmoViewModel) {
                                 contentDescription = "Batch Rank"
                             )
                         },
-                        label = { Text("Rank Matrix", fontSize = 10.sp) },
+                        label = { Text("Rank", fontSize = 10.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = SleekPurpleOnContainer,
                             selectedTextColor = SleekPurpleOnContainer,
@@ -302,7 +378,7 @@ fun MainAppScreen(viewModel: OsmoViewModel) {
                                 contentDescription = "360 Inspector"
                             )
                         },
-                        label = { Text("360 Angles", fontSize = 10.sp) },
+                        label = { Text("Angles", fontSize = 10.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = SleekPurpleOnContainer,
                             selectedTextColor = SleekPurpleOnContainer,
@@ -313,57 +389,57 @@ fun MainAppScreen(viewModel: OsmoViewModel) {
                     )
 
                     NavigationBarItem(
-                        selected = selectedTab == AppTab.EDL_DAVINCI,
-                        onClick = { viewModel.selectTab(AppTab.EDL_DAVINCI) },
+                        selected = selectedTab == AppTab.AI_SOUNDTRACK,
+                        onClick = { viewModel.selectTab(AppTab.AI_SOUNDTRACK) },
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.ContentCut,
-                                contentDescription = "DaVinci EDL"
+                                imageVector = Icons.Default.GraphicEq,
+                                contentDescription = "AI Music"
                             )
                         },
-                        label = { Text("Resolve EDL", fontSize = 10.sp) },
+                        label = { Text("Music", fontSize = 10.sp) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = SleekPurpleOnContainer,
-                            selectedTextColor = SleekPurpleOnContainer,
-                            indicatorColor = SleekPurpleContainer,
+                            selectedIconColor = Color.Black,
+                            selectedTextColor = OsmoCyan,
+                            indicatorColor = OsmoCyan,
                             unselectedIconColor = SleekTextSecondary,
                             unselectedTextColor = SleekTextSecondary
                         )
                     )
 
                     NavigationBarItem(
-                        selected = selectedTab == AppTab.SOCIAL_COPY,
-                        onClick = { viewModel.selectTab(AppTab.SOCIAL_COPY) },
+                        selected = selectedTab == AppTab.COLOR_GRADING_LUT,
+                        onClick = { viewModel.selectTab(AppTab.COLOR_GRADING_LUT) },
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.Translate,
-                                contentDescription = "Social Copy"
+                                imageVector = Icons.Default.ColorLens,
+                                contentDescription = "3D LUT"
                             )
                         },
-                        label = { Text("3-Lang Copy", fontSize = 10.sp) },
+                        label = { Text("Color", fontSize = 10.sp) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = SleekPurpleOnContainer,
-                            selectedTextColor = SleekPurpleOnContainer,
-                            indicatorColor = SleekPurpleContainer,
+                            selectedIconColor = Color.Black,
+                            selectedTextColor = OsmoOrange,
+                            indicatorColor = OsmoOrange,
                             unselectedIconColor = SleekTextSecondary,
                             unselectedTextColor = SleekTextSecondary
                         )
                     )
 
                     NavigationBarItem(
-                        selected = selectedTab == AppTab.DIRECTOR_PLAN,
-                        onClick = { viewModel.selectTab(AppTab.DIRECTOR_PLAN) },
+                        selected = selectedTab == AppTab.DIRECTOR_COPILOT,
+                        onClick = { viewModel.selectTab(AppTab.DIRECTOR_COPILOT) },
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.Description,
-                                contentDescription = "Director Plan"
+                                imageVector = Icons.Default.Videocam,
+                                contentDescription = "AI Director"
                             )
                         },
-                        label = { Text("Director Cut", fontSize = 10.sp) },
+                        label = { Text("Director", fontSize = 10.sp) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = SleekPurpleOnContainer,
-                            selectedTextColor = SleekPurpleOnContainer,
-                            indicatorColor = SleekPurpleContainer,
+                            selectedIconColor = Color.White,
+                            selectedTextColor = OsmoPurple,
+                            indicatorColor = OsmoPurple,
                             unselectedIconColor = SleekTextSecondary,
                             unselectedTextColor = SleekTextSecondary
                         )
@@ -415,6 +491,22 @@ fun MainAppScreen(viewModel: OsmoViewModel) {
                     )
                 }
 
+                AppTab.AI_SOUNDTRACK -> {
+                    SoundtrackStudioScreen(viewModel = viewModel)
+                }
+
+                AppTab.COLOR_GRADING_LUT -> {
+                    ColorGradingScreen(viewModel = viewModel)
+                }
+
+                AppTab.SPEED_RAMP_STUDIO -> {
+                    SpeedRampStudioScreen(viewModel = viewModel)
+                }
+
+                AppTab.KINETIC_SUBTITLES -> {
+                    KineticSubtitlesScreen(viewModel = viewModel)
+                }
+
                 AppTab.SOCIAL_COPY -> {
                     SocialCopyStudioScreen(
                         copies = socialCopies,
@@ -430,6 +522,10 @@ fun MainAppScreen(viewModel: OsmoViewModel) {
                         onRegeneratePlanClick = { viewModel.regenerateDirectorScript() },
                         onOpenExportSheetClick = { viewModel.setShowExportDialog(true) }
                     )
+                }
+
+                AppTab.DIRECTOR_COPILOT -> {
+                    DirectorCopilotScreen(viewModel = viewModel)
                 }
             }
         }
@@ -463,3 +559,4 @@ fun MainAppScreen(viewModel: OsmoViewModel) {
         )
     }
 }
+

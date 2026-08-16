@@ -29,6 +29,14 @@ val OsmoTeal = Color(0xFF6750A4)
 val OsmoTealDark = Color(0xFF4F378B)
 val OsmoCyanGlow = Color(0xFF0284C7)
 
+// Studio Pro Neon Palette
+val OsmoCyan = Color(0xFF00E5FF)
+val OsmoOrange = Color(0xFFFF6D00)
+val OsmoNeonGreen = Color(0xFF00E676)
+val OsmoYellow = Color(0xFFFFD600)
+val OsmoPurple = Color(0xFFB388FF)
+val OsmoDarkSurface = Color(0xFF161B22)
+
 // Neutral Slates mapped to Sleek Interface tokens for clean backward compatibility
 val Slate950 = Color(0xFFFBF8FD)
 val Slate900 = Color(0xFFFFFFFF)
